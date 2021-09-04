@@ -1,5 +1,5 @@
 // On a MVC structure, we put our route functions here
-const { Product } = require('../modals/product')
+const { Product } = require('../models/product')
 
 exports.getAddProductPage = (req, res, next) => {
   res.render('add-product', { pageTitle: 'Add Product' });
