@@ -1,0 +1,16 @@
+<%- include('templates/header', {title: 'Learning EJS'}) %> 
+
+<%- include('templates/navigation.ejs')  %> 
+<div class="container">
+  <h1>Hello Express</h1>
+  <p>Your name is <%= name %> </p>
+  <br />
+  <h2>Fruits</h2>
+  <ul>
+    <% for(var i = 0; i < fruits.length; i++) { %> 
+      <li><%= fruits[i] %></li>
+    <% } %> 
+  </ul>
+</div>
+
+<%- include('templates/footer') %>
