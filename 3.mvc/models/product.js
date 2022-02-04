@@ -1,49 +1,48 @@
-// Model controls the logic related to database, reading + modification of data.
+const fs = require('fs');
+const path = require('path');
 
-// We will try to save things in a file instead of inside a DB for now
-const fs = require('fs')
-const path = require('path')
-const rootDir = require('../util/path')
+const p = path.join(
+  path.dirname(process.mainModule.filename),
+  'data',
+  'products.json'
+);
 
-let products = []
+const getProductsFromFile = cb => {
+  fs.readFile(p, (err, fileContent) => {
+    if (err) {
+      cb([]);
+    } else {
+      cb(JSON.parse(fileContent));
+    }
+  });
+};
 
 module.exports = class Product {
-  constructor(title) {
-    this.title = title
+  constructor(title, imageUrl, description, price) {
+    this.title = title;
+    this.imageUrl = imageUrl;
+    this.description = description;
+    this.price = price;
   }
 
-  // Save a new product into products
   save() {
-    // Read current JSON array
-    const filepath = path.join(rootDir, 'data', 'products.json')
-    fs.readFile(filepath, (err, data) => {
-      if (!err) {
-        products = JSON.parse(data);
-      }
-
-      products.push(this)
-      fs.writeFile(filepath, JSON.stringify(products), (err) => {
-        if (err) { throw 'Cannot write into file' }
-      })
-    })
+    this.id = Math.floor(Math.random() * 90000).toString()
+    getProductsFromFile(products => {
+      products.push(this);
+      fs.writeFile(p, JSON.stringify(products), err => {
+        console.log(err);
+      });
+    });
   }
 
-  // Get all products
-  static fetchAll () {
-    // Because return does not work inside readfile() due to different scope, we cannot directly return products
-    // Therefore we need a promise to send the products as a resolve method.
-    return new Promise((resolve, reject) => {
-      try{
-        const filepath = path.join(rootDir, 'data', 'products.json')
-        fs.readFile(filepath, (err, data) => {
-          if (!err) {
-            products = JSON.parse(data);
-          }
-          resolve(products)
-        })
-      } catch(error) {
-        reject(error)
-      }
-    })
+  static fetchAll(cb) {
+    getProductsFromFile(cb);
   }
-}
+
+  static findById(id, cb) {
+    getProductsFromFile(products => {
+      const product = products.find(x => x.id === id);
+      cb(product)
+    });
+  }
+};

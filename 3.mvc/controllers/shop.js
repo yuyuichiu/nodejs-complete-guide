@@ -1,0 +1,72 @@
+const { redirect } = require('express/lib/response');
+const Product = require('../models/product');
+const Cart = require('../models/cart')
+
+exports.getProducts = (req, res, next) => {
+  Product.fetchAll(products => {
+    res.render('shop/product-list', {
+      prods: products,
+      pageTitle: 'All Products',
+      path: '/products'
+    });
+  });
+};
+
+exports.getOneProduct = (req, res, next) => {
+  const productId = req.params.productId;
+  Product.findById(productId, result => {
+    // Redirect if product does not exist
+    if(!result) {
+      return res.redirect('/');
+    }
+
+    // Render page based on product found.
+    res.render('shop/product-detail', {
+      product: result,
+      pageTitle: 'Detail: ' + result.title,
+      path: '/products'
+    })
+  })
+}
+
+exports.getIndex = (req, res, next) => {
+  Product.fetchAll(products => {
+    res.render('shop/index', {
+      prods: products,
+      pageTitle: 'Shop',
+      path: '/'
+    });
+  });
+};
+
+exports.getCart = (req, res, next) => {
+  Cart.getCart().then(cart => {
+    res.render('shop/cart', {
+      path: '/cart',
+      pageTitle: 'Your Cart',
+      cart: cart
+    });
+  })
+};
+
+exports.postCart = (req, res, next) => {
+  const productId = req.body.productId;
+  Product.findById(productId, result => {
+    Cart.addProduct(result);
+    res.redirect('/cart')
+  })
+}
+
+exports.getOrders = (req, res, next) => {
+  res.render('shop/orders', {
+    path: '/orders',
+    pageTitle: 'Your Orders'
+  });
+};
+
+exports.getCheckout = (req, res, next) => {
+  res.render('shop/checkout', {
+    path: '/checkout',
+    pageTitle: 'Checkout'
+  });
+};
